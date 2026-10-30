@@ -17,7 +17,12 @@
             pname = "secretspec";
             version = (builtins.fromTOML (builtins.readFile ./Cargo.toml)).workspace.package.version;
             # Tests use shell fixtures and other non-Rust files from the repository.
-            src = self;
+            src = pkgs.lib.cleanSourceWith {
+              src = self;
+              filter = path: type:
+                pkgs.lib.cleanSourceFilter path type
+                && !(builtins.elem (builtins.baseNameOf path) [ ".github" "flake.nix" "flake.lock" ]);
+            };
             cargoExtraArgs = "-p secretspec";
             nativeBuildInputs = [ pkgs.cmake pkgs.pkg-config ];
             nativeCheckInputs = [ pkgs.gitMinimal pkgs.jq pkgs.sops ];
