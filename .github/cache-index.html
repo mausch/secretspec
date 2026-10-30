@@ -55,11 +55,13 @@ nix develop github:mausch/secretspec/nix-cache</code></pre>
     <p>The published cache currently targets <strong>x86_64-linux</strong>. Nix downloads a matching cached build when available; other systems or changed build inputs can require compilation.</p>
 
     <h2>Use it from another flake</h2>
-    <pre><code>inputs.secretspec.url = "github:mausch/secretspec/nix-cache";
+    <p>Pin a packaged stable release using its immutable tag:</p>
+    <pre><code>inputs.secretspec.url = "github:mausch/secretspec/nix-cache/v0.21.1";
 
 # Within your outputs, for the desired system:
 # secretspec.packages.${system}.default</code></pre>
     <p>Keep its pinned Nixpkgs input to match the published derivation. Overriding dependencies can change the store path and cause a cache miss.</p>
+    <p>Use <code>github:mausch/secretspec/nix-cache</code> to follow the packaging branch instead. Each new stable release gets a <code>nix-cache/vX.Y.Z</code> tag after successful cache publication; existing packaging tags stay unchanged.</p>
 
     <h2>Release updates</h2>
     <p>Every Monday at 06:23 UTC, an automated workflow checks upstream's latest stable release. New releases receive the fork's Nix packaging commits through a rebase. A successful build and test run publishes signed binaries to GitHub Releases and cache metadata to this site. Rebase conflicts or failed builds stop publication and appear in <a href="https://github.com/mausch/secretspec/actions">Actions</a>.</p>

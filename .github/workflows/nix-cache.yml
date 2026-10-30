@@ -45,3 +45,21 @@ jobs:
           path: ./cache-site
       - uses: actions/deploy-pages@v4
         id: pages
+      - name: Publish immutable packaging tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          version=$(cat .github/nix-upstream-tag)
+          [[ "$version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          ref="refs/tags/nix-cache/$version"
+          existing=$(gh api "repos/$GITHUB_REPOSITORY/git/matching-refs/tags/nix-cache/$version" \
+            --jq ".[] | select(.ref == \"$ref\") | .object.sha")
+          if [ -n "$existing" ]; then
+            echo "$ref already exists at $existing; preserving it unchanged."
+          else
+            sha=$(git rev-parse HEAD)
+            gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" \
+              -f ref="$ref" -f sha="$sha"
+          fi
