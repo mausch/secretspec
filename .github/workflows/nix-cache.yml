@@ -35,6 +35,7 @@ jobs:
         with:
           paths-file: cache-paths.txt
           github-token: ${{ github.token }}
+          github-release-tag: binary-cache
           signing-key: ${{ secrets.NIX_CACHE_SIGNING_KEY }}
           upstream-caches: https://cache.nixos.org
           static: ./cache-site/cache
