@@ -16,7 +16,8 @@
           secretspec = craneLib.buildPackage {
             pname = "secretspec";
             version = (builtins.fromTOML (builtins.readFile ./Cargo.toml)).workspace.package.version;
-            src = craneLib.cleanCargoSource self;
+            # Tests use shell fixtures and other non-Rust files from the repository.
+            src = self;
             cargoExtraArgs = "-p secretspec";
             nativeBuildInputs = [ pkgs.cmake pkgs.pkg-config ];
             nativeCheckInputs = [ pkgs.gitMinimal pkgs.jq pkgs.sops ];
