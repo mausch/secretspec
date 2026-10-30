@@ -22,7 +22,14 @@
     <p>A Nix flake and signed binary cache for <a href="https://secretspec.dev/">SecretSpec</a>, built from upstream stable releases.</p>
     <p><a href="https://github.com/mausch/secretspec/tree/nix-cache">Flake source</a> · <a href="https://github.com/mausch/secretspec/actions/workflows/nix-cache.yml">Build status</a> · <a href="https://github.com/cachix/secretspec/releases">Upstream releases</a></p>
 
-    <h2>1. Enable the binary cache</h2>
+    <h2>Quick start: accept the flake's cache settings</h2>
+    <p>The flake declares its cache URL and signing key. Accept them for this invocation:</p>
+    <pre><code>nix run --accept-flake-config github:mausch/secretspec/nix-cache -- --help</code></pre>
+    <p>This authorizes the settings requested by the flake, including trust in this fork's signing key. Without the flag, interactive Nix can prompt for approval. On a multi-user installation, the Nix daemon still enforces its trust policy: an untrusted user may need an administrator to authorize the cache and key using the configuration below. The flag does not bypass daemon restrictions.</p>
+    <p>To install with the same per-invocation approval:</p>
+    <pre><code>nix profile add --accept-flake-config github:mausch/secretspec/nix-cache</code></pre>
+
+    <h2>1. Enable the binary cache persistently</h2>
     <p>Add these settings to your Nix configuration, retaining the default NixOS cache for runtime dependencies:</p>
     <pre><code>extra-substituters = https://mausch.github.io/secretspec/cache
 extra-trusted-public-keys = mausch-secretspec-1:9RPSefpJCeOFiK0P1g28zfuG1r3p9QgNsIM4G+qU5fI=</code></pre>

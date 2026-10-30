@@ -1,6 +1,13 @@
 {
   description = "SecretSpec — declarative secrets for every environment";
 
+  nixConfig = {
+    extra-substituters = [ "https://mausch.github.io/secretspec/cache" ];
+    extra-trusted-public-keys = [
+      "mausch-secretspec-1:9RPSefpJCeOFiK0P1g28zfuG1r3p9QgNsIM4G+qU5fI="
+    ];
+  };
+
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
   inputs.crane.url = "github:ipetkov/crane";
   outputs = { self, nixpkgs, crane }:
