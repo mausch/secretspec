@@ -37,7 +37,7 @@ jobs:
           github-token: ${{ github.token }}
           signing-key: ${{ secrets.NIX_CACHE_SIGNING_KEY }}
           upstream-caches: https://cache.nixos.org
-          static: ./cache-site
+          static: ./cache-site/cache
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./cache-site
