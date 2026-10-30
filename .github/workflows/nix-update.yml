@@ -1,0 +1,47 @@
+name: Update stable upstream release
+on:
+  schedule:
+    - cron: '23 6 * * 1'
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: nix-cache-publisher
+  cancel-in-progress: false
+jobs:
+  update:
+    if: github.repository == 'mausch/secretspec'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: nix-cache
+          fetch-depth: 0
+      - name: Rebase packaging onto latest stable release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          release=$(gh api repos/cachix/secretspec/releases/latest)
+          test "$(jq -r '.draft or .prerelease' <<< "$release")" = false
+          tag=$(jq -r .tag_name <<< "$release")
+          [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          current=$(cat .github/nix-upstream-tag)
+          if [ "$current" = "$tag" ]; then
+            echo "Already tracking $tag"
+            exit 0
+          fi
+          git remote add upstream https://github.com/cachix/secretspec.git
+          git fetch upstream "refs/tags/$tag:refs/tags/$tag" "refs/tags/$current:refs/tags/$current"
+          git merge-base --is-ancestor "$current^{commit}" "$tag^{commit}"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          old_head=$(git rev-parse HEAD)
+          git rebase --onto "$tag^{commit}" "$current^{commit}"
+          printf '%s\n' "$tag" > .github/nix-upstream-tag
+          git add .github/nix-upstream-tag
+          git commit -m "nix: track upstream $tag"
+          git push --force-with-lease="refs/heads/nix-cache:$old_head" origin HEAD:nix-cache
+          gh workflow run nix-cache.yml --ref nix-cache

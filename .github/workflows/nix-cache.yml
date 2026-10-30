@@ -1,0 +1,45 @@
+name: Nix binary cache
+on:
+  workflow_dispatch:
+  push:
+    branches: [nix-cache]
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: nix-cache-publisher
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.repository == 'mausch/secretspec'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.pages.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: nix-cache
+          persist-credentials: false
+      - uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            extra-substituters = https://mausch.github.io/secretspec/cache
+            extra-trusted-public-keys = ${{ vars.NIX_CACHE_PUBLIC_KEY }}
+      - name: Build and test
+        run: |
+          nix build --print-out-paths > cache-paths.txt
+          ./result/bin/secretspec --version
+      - uses: randymarsh77/static-nix-cache/deploy@2fd0437df12c2d921d5bce8d3070faf6a04ed237
+        with:
+          paths-file: cache-paths.txt
+          github-token: ${{ github.token }}
+          signing-key: ${{ secrets.NIX_CACHE_SIGNING_KEY }}
+          upstream-caches: https://cache.nixos.org
+          static: ./cache-site
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./cache-site
+      - uses: actions/deploy-pages@v4
+        id: pages
