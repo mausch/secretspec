@@ -38,6 +38,8 @@ jobs:
           signing-key: ${{ secrets.NIX_CACHE_SIGNING_KEY }}
           upstream-caches: https://cache.nixos.org
           static: ./cache-site/cache
+      - name: Add usage guide
+        run: cp .github/cache-index.html cache-site/index.html
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./cache-site
